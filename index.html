@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <div class="words">
+        
+    </div>
+
+    <!-- <script src="./brain-browser.min.js"></script> -->
+     <script>
+    const data = [
+                    {"question": "How are you","answer": "I'm Great How about you"},
+                    {"question": "What are you doing","answer": "I am doing nothing What are you doing"},
+                    {"question": "Where are we","answer": "You are in a world of Fantasy do you like magic"},
+                    {"question": "Do you Love","answer": "Somethimes When I like someone, but you are the important person"},
+                    {"question": "Would you Mind telling me something new","answer": "Of course do you like chess"}
+                ]
+        const config = {
+            binaryThresh: 0.5,
+            hiddenLayers: [3], // array of ints for the sizes of the hidden layers in the network
+            activation: 'sigmoid', // supported activation types: ['sigmoid', 'relu', 'leaky-relu', 'tanh'],
+            leakyReluAlpha: 0.01, //
+        }
+
+            const net = new brain.NeuralNetwork(config);
+            // const netString = new brain.recurrent.LSTM();
+            const netString = new brain.recurrent.LSTM()
+            net.train([
+                {input: [0,0], output: [0]},
+                {input: [0,1], output: [0]},
+                {input: [1,0], output: [1]},
+                {input: [1,1], output: [1]}
+            ]);        
+            const result = net.run([1,0]);
+
+            const variablesData = data.map(item => ({
+                input: item.question,
+                output: item.answer
+            }));
+
+            netString.train([
+                {input: 'Hello my name is rodrigo', output: 'respond'},
+                {input: 'what is your name', output: 'question'}
+            ])
+            console.log(netString.run('hello my name is carlos'));
+
+    </script>
+    
+    <script>
+        
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        const  recognition = new SpeechRecognition();
+                recognition.interimResults = true;
+        let p = document.createElement('p');
+            const words = document.querySelector('.words');
+            words.appendChild(p);
+
+            recognition.addEventListener('result', (e) => {                
+                const transcript = Array.from(e.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('')
+                p.textContent = transcript;
+                // if(transcript.includes('hello')){
+                //     alert('huhu');
+                // }
+                if(e.results[0].isFinal){
+                voiceTalker(transcript);
+                    p = document.createElement('p');
+                    words.appendChild(p);
+                }
+
+                // console.log(transcript);
+            });
+
+            recognition.addEventListener('end', recognition.start);
+            const voiceTalker = (talk) => {
+                const speech = new SpeechSynthesisUtterance();
+                speech.lang = 'en-US';
+                speech.text = talk;
+                speech.volume = 1;
+                speech.rate = 1;
+                speech.pitch = 1;
+                window.speechSynthesis.speak(speech)
+            }
+            recognition.start();
+    </script>
+</body>
+</html>
